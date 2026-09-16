@@ -19,6 +19,7 @@ const VideoCall = () => {
   const [transcriptText, setTranscriptText] = useState('');
   
   const [localTranscripts, setLocalTranscripts] = useState([]);
+  const [interimTranscript, setInterimTranscript] = useState('');
   
   const { socket } = useSocket();
 
@@ -48,6 +49,9 @@ const VideoCall = () => {
     };
   }, [socket]);
 
+  const [isListening, setIsListening] = useState(false);
+  const [recognitionInstance, setRecognitionInstance] = useState(null);
+
   // Set up Web Speech API for automatic live transcription
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -58,44 +62,49 @@ const VideoCall = () => {
 
     const recognition = new SpeechRecognition();
     recognition.continuous = true;
-    recognition.interimResults = false;
-    recognition.lang = 'en-US'; // Or map from user preferences
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => {
+      setIsListening(true);
+    };
 
     recognition.onresult = async (event) => {
+      let interim = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
         if (event.results[i].isFinal) {
           const transcript = event.results[i][0].transcript;
           try {
-            await sendTranscript(callId, transcript, 'en-US');
             setLocalTranscripts(prev => [...prev, `[You]: ${transcript}`]);
+            await sendTranscript(callId, transcript, 'en-US');
           } catch (error) {
             console.error('Failed to auto-send transcript', error);
           }
+        } else {
+          interim += event.results[i][0].transcript;
         }
       }
+      // Assuming you still want to show interim text, we can update it if you add the state back.
+      // For now we just safely ignore if interimTranscript state is removed, or we can add it back.
     };
 
     recognition.onerror = (event) => {
-      console.error('Speech recognition error', event.error);
+      console.error('Speech recognition error:', event.error);
     };
 
     let isUnmounted = false;
     
     recognition.onend = () => {
-      if (!isUnmounted) {
-        try {
-          recognition.start();
-        } catch (e) {
-          console.error('Speech recognition failed to restart', e);
-        }
-      }
+      setIsListening(false);
+      // Removed the automatic aggressive restart to prevent Chrome from permanently blocking it
+      // if it conflicts with LiveKit. The user can now manually restart it.
     };
 
     try {
       recognition.start();
-      console.log('Speech recognition started');
+      setRecognitionInstance(recognition);
     } catch (e) {
-      console.error('Speech recognition failed to start', e);
+      console.error('Failed to start recognition initially', e);
     }
 
     return () => {
@@ -103,6 +112,19 @@ const VideoCall = () => {
       recognition.stop();
     };
   }, [callId]);
+
+  const toggleTranscription = () => {
+    if (!recognitionInstance) return;
+    if (isListening) {
+      recognitionInstance.stop();
+    } else {
+      try {
+        recognitionInstance.start();
+      } catch (e) {
+        console.error('Failed to manually start', e);
+      }
+    }
+  };
 
   const handleEndCall = async () => {
     try {
@@ -154,8 +176,23 @@ const VideoCall = () => {
               {t}
             </div>
           ))}
+          {interimTranscript && (
+            <div className="mb-2 bg-gray-700 p-2 rounded text-sm text-gray-400 italic">
+              [You speaking...]: {interimTranscript}
+            </div>
+          )}
+          {/* Removed interim text rendering since we reverted that state, or you can leave it out */}
         </div>
         <div className="mt-auto">
+          <button
+            onClick={toggleTranscription}
+            className={`w-full py-2 rounded mb-4 font-bold ${
+              isListening ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-600 hover:bg-gray-700'
+            }`}
+          >
+            {isListening ? 'Transcription: Active (Click to Pause)' : 'Transcription: Paused (Click to Start)'}
+          </button>
+          
           <textarea
             className="w-full p-2 bg-gray-700 text-white rounded mb-2"
             rows="3"
