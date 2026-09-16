@@ -79,6 +79,18 @@ const VideoCall = () => {
       console.error('Speech recognition error', event.error);
     };
 
+    let isUnmounted = false;
+    
+    recognition.onend = () => {
+      if (!isUnmounted) {
+        try {
+          recognition.start();
+        } catch (e) {
+          console.error('Speech recognition failed to restart', e);
+        }
+      }
+    };
+
     try {
       recognition.start();
       console.log('Speech recognition started');
@@ -87,6 +99,7 @@ const VideoCall = () => {
     }
 
     return () => {
+      isUnmounted = true;
       recognition.stop();
     };
   }, [callId]);
