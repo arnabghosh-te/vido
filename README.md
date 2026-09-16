@@ -517,4 +517,728 @@ Example:
 
 ---
 
-# 💰 Token Bi
+# 💰 Token Billing
+
+Both participants are charged for the call.
+
+The backend calculates duration using:
+
+```text
+startedAt
+endedAt
+```
+
+The frontend cannot be trusted to provide the final call duration.
+
+The billing system is designed to be idempotent so a call cannot be charged twice because of:
+
+* API retries
+* Socket reconnects
+* Browser refresh
+* Duplicate events
+* Network issues
+
+---
+
+# ⚠️ Token Exhaustion
+
+When a user's tokens are exhausted:
+
+```text
+1. Send Socket.IO event
+2. Notify both users
+3. Terminate LiveKit call
+4. Calculate final duration
+5. Calculate token usage
+6. Deduct tokens
+7. Create token transaction
+8. Mark call TOKEN_EXHAUSTED
+9. Save call record
+```
+
+The frontend immediately responds to the server event.
+
+---
+
+# 🔔 Real-Time Notifications
+
+Socket.IO is used only where real-time communication is required.
+
+Supported events include:
+
+```text
+Notifications
+Token warnings
+Token exhaustion
+Call status updates
+Transcript updates
+```
+
+Notification types:
+
+```text
+LOW_TOKEN
+TOKEN_EXHAUSTED
+CALL_STARTED
+CALL_ENDED
+SUBSCRIPTION_EXPIRING
+```
+
+Notifications are both:
+
+1. Stored in PostgreSQL
+2. Delivered through Socket.IO
+
+Duplicate notifications should not be continuously generated.
+
+---
+
+# 📝 Multilingual Transcription
+
+The transcription architecture is abstracted so the provider can be replaced later.
+
+```text
+LiveKit Audio
+     ↓
+Speech-to-Text Service
+     ↓
+Language Detection
+     ↓
+Transcript Segment
+     ↓
+Backend
+     ↓
+Socket.IO
+     ↓
+React
+```
+
+Transcript segments contain:
+
+```text
+speakerId
+text
+language
+startTime
+endTime
+```
+
+Example:
+
+```text
+User A:
+Hello, how are you?
+
+Language:
+en
+
+User B:
+मैं ठीक हूँ।
+
+Language:
+hi
+```
+
+---
+
+# 🤖 Gemini AI
+
+Gemini is used exclusively from the backend.
+
+Environment variable:
+
+```env
+GEMINI_API_KEY=
+```
+
+Service:
+
+```text
+services/geminiService.js
+```
+
+Main functions:
+
+```text
+generateSummary()
+askDocumentQuestion()
+generateEmbedding()
+```
+
+The Gemini API key is never exposed to React.
+
+---
+
+# 📄 AI Transcript Summaries
+
+Saved transcripts can be processed by Gemini.
+
+```text
+Transcript
+    ↓
+Gemini
+    ↓
+Summary
+    ↓
+Key Points
+    ↓
+Action Items
+    ↓
+Important Decisions
+```
+
+Generated summaries are stored in PostgreSQL.
+
+---
+
+# 📚 Document RAG
+
+Supported file types:
+
+```text
+PDF
+DOCX
+TXT
+```
+
+Multer is used for uploads.
+
+## RAG Pipeline
+
+```text
+Upload Document
+       ↓
+Extract Text
+       ↓
+Split Into Chunks
+       ↓
+Generate Embeddings
+       ↓
+Store in pgvector
+       ↓
+User Asks Question
+       ↓
+Generate Question Embedding
+       ↓
+Vector Similarity Search
+       ↓
+Retrieve Relevant Chunks
+       ↓
+Send Context + Question to Gemini
+       ↓
+Generate Answer
+```
+
+The entire document is not sent to Gemini for every question.
+
+Only relevant chunks are retrieved.
+
+If the answer cannot be found in the uploaded document, the system should clearly state that the information could not be found rather than hallucinating an answer.
+
+---
+
+# 🌐 API Overview
+
+## Authentication
+
+```text
+POST /api/auth/register
+POST /api/auth/login
+POST /api/auth/logout
+GET  /api/auth/profile
+PUT  /api/auth/profile
+PUT  /api/auth/change-password
+```
+
+## Subscription Plans
+
+```text
+GET /api/subscription-plans
+```
+
+## Admin Subscription Plans
+
+```text
+POST   /api/admin/subscription-plans
+GET    /api/admin/subscription-plans
+GET    /api/admin/subscription-plans/:id
+PUT    /api/admin/subscription-plans/:id
+PATCH  /api/admin/subscription-plans/:id/status
+DELETE /api/admin/subscription-plans/:id
+```
+
+## Calls
+
+```text
+POST /api/calls
+GET  /api/calls/:callId
+POST /api/calls/:callId/join
+POST /api/calls/:callId/end
+```
+
+## Transcripts
+
+```text
+POST   /api/transcripts
+GET    /api/transcripts
+GET    /api/transcripts/:id
+DELETE /api/transcripts/:id
+POST   /api/transcripts/:id/summary
+```
+
+## Documents
+
+```text
+POST /api/documents
+GET  /api/documents
+GET  /api/documents/:id
+POST /api/documents/:id/ask
+DELETE /api/documents/:id
+```
+
+---
+
+# 🖥️ Frontend Routes
+
+## User
+
+```text
+/login
+/register
+/dashboard
+/subscriptions
+/call/:callId
+/documents
+/transcripts
+```
+
+## Super Admin
+
+```text
+/admin/dashboard
+/admin/users
+/admin/calls
+/admin/subscription-plans
+```
+
+---
+
+# ⚙️ Environment Variables
+
+## Backend
+
+Create:
+
+```text
+backend/.env
+```
+
+Example:
+
+```env
+NODE_ENV=development
+
+PORT=5000
+
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_NAME=vidu
+DB_USER=postgres
+DB_PASSWORD=your_password
+
+JWT_SECRET=your_jwt_secret
+JWT_EXPIRES_IN=7d
+
+LIVEKIT_URL=
+LIVEKIT_API_KEY=
+LIVEKIT_API_SECRET=
+
+GEMINI_API_KEY=
+
+CALL_TOKEN_RATE_PER_MINUTE=10
+```
+
+> Never commit `.env` to GitHub.
+
+Add:
+
+```text
+.env
+```
+
+to `.gitignore`.
+
+---
+
+## Frontend
+
+Create:
+
+```text
+frontend/.env
+```
+
+Example:
+
+```env
+VITE_API_URL=http://localhost:5000/api
+```
+
+Only public frontend configuration should use `VITE_` variables.
+
+Never put these in the frontend:
+
+```text
+JWT_SECRET
+GEMINI_API_KEY
+LIVEKIT_API_SECRET
+DB_PASSWORD
+```
+
+---
+
+# 🚀 Installation
+
+## 1. Clone Repository
+
+```bash
+git clone <your-repository-url>
+cd vidu
+```
+
+---
+
+# Backend Setup
+
+```bash
+cd backend
+npm install
+```
+
+Create `.env`:
+
+```env
+PORT=5000
+```
+
+Configure PostgreSQL credentials and application secrets.
+
+Run migrations:
+
+```bash
+npx sequelize-cli db:migrate
+```
+
+Start development server:
+
+```bash
+npm run dev
+```
+
+Backend should run on:
+
+```text
+http://localhost:5000
+```
+
+---
+
+# Frontend Setup
+
+Open another terminal:
+
+```bash
+cd frontend
+npm install
+```
+
+Create:
+
+```text
+.env
+```
+
+with:
+
+```env
+VITE_API_URL=http://localhost:5000/api
+```
+
+Start React:
+
+```bash
+npm run dev
+```
+
+The Vite development server will provide the frontend URL.
+
+---
+
+# 🔄 Development Workflow
+
+The application is developed incrementally.
+
+```text
+Phase 1
+Project Setup
+     ↓
+Phase 2
+Authentication
+     ↓
+Phase 3
+Super Admin
+     ↓
+Phase 4
+Subscription Plans
+     ↓
+Phase 5
+User Subscription
+     ↓
+Phase 6
+Token System
+     ↓
+Phase 7
+LiveKit Calling
+     ↓
+Phase 8
+Token Billing
+     ↓
+Phase 9
+Transcription
+     ↓
+Phase 10
+Gemini Summary
+     ↓
+Phase 11
+RAG
+     ↓
+Phase 12
+Admin Analytics
+     ↓
+Phase 13
+Testing & Security
+```
+
+---
+
+# 🧪 Testing
+
+The application should test:
+
+* Authentication
+* Authorization
+* Role protection
+* Subscription rules
+* Token allocation
+* Token deduction
+* Token transactions
+* Token exhaustion
+* LiveKit calls
+* Concurrent calls
+* Call reconnection
+* Call termination
+* Multilingual transcription
+* Gemini failures
+* Large document processing
+* RAG retrieval
+* File upload security
+* API security
+* Ownership validation
+* Duplicate billing
+
+---
+
+# 🔒 Security
+
+Security measures include:
+
+* JWT authentication
+* Role-based authorization
+* bcryptjs password hashing
+* Helmet
+* CORS
+* Rate limiting
+* Input validation
+* File type validation
+* File size limits
+* Database foreign keys
+* Sequelize transactions
+* Idempotent token billing
+* User ownership checks
+* Secure API credentials
+
+Never expose:
+
+```text
+Database password
+JWT secret
+Gemini API key
+LiveKit API secret
+User passwords
+```
+
+to the frontend.
+
+---
+
+# 📊 User Dashboard
+
+The dashboard provides:
+
+```text
+User Name
+
+Active Subscription
+Subscription Expiry
+Remaining Tokens
+Used Tokens
+
+Start New Call
+
+Recent Calls
+Recent Transcripts
+Recent Documents
+Notifications
+```
+
+---
+
+# 👑 Super Admin Dashboard
+
+The admin dashboard provides:
+
+```text
+Total Users
+Active Users
+Active Subscriptions
+Total Calls
+Active Calls
+Total Call Duration
+Total Tokens Consumed
+Total Documents
+Total Transcripts
+```
+
+---
+
+# 🎯 Project Goal
+
+Vidu brings together:
+
+```text
+Authentication
+      +
+Subscriptions
+      +
+Token Economy
+      +
+Live Video Calling
+      +
+Multilingual Transcription
+      +
+AI Summaries
+      +
+Document RAG
+      +
+Real-Time Notifications
+      +
+Super Admin Management
+```
+
+into one modular full-stack platform.
+
+The final user journey is:
+
+```text
+                 USER
+                   |
+            Register / Login
+                   |
+            User Dashboard
+                   |
+       ┌───────────┼───────────┐
+       ↓           ↓           ↓
+ Subscription    Calls      Documents
+       ↓           ↓           ↓
+    Tokens      LiveKit       RAG
+                   ↓
+             Transcription
+                   ↓
+            Save Transcript
+                   ↓
+             Gemini Summary
+```
+
+Super Admin:
+
+```text
+              SUPER ADMIN
+                   |
+            Admin Dashboard
+                   |
+       ┌───────────┼───────────┐
+       ↓           ↓           ↓
+     Users    Subscriptions   Usage
+                   |
+            Create / Edit Plans
+                   |
+          Price / Tokens / Duration
+```
+
+---
+
+# 📌 Development Principles
+
+* Build one phase at a time.
+* Complete database changes before dependent application logic.
+* Use Sequelize migrations for database changes.
+* Keep associations in `models/index.js`.
+* Keep business logic inside services.
+* Keep controllers thin.
+* Do not assume files exist before creating them.
+* Avoid unnecessary rewrites of working code.
+* Validate ownership on the backend.
+* Never trust client-provided billing information.
+* Keep API keys and secrets on the backend.
+* Use LiveKit for video/audio.
+* Use Socket.IO only for real-time events.
+* Do not introduce Redis or BullMQ.
+* Fix errors before moving to the next development phase.
+
+---
+
+# 📄 License
+
+This project is currently intended for development and educational purposes.
+
+Add your preferred license here before publishing the project publicly.
+
+---
+
+## ⭐ Project Status
+
+Development is being completed incrementally according to the defined development phases.
+
+```text
+Backend
+   ↓
+Database
+   ↓
+APIs
+   ↓
+React Integration
+   ↓
+LiveKit
+   ↓
+AI / RAG
+   ↓
+Testing
+   ↓
+Production Readiness
+```
+
+---
+
+### Built With
+
+**Node.js · Express.js · PostgreSQL · Sequelize · React · Vite · Tailwind CSS · LiveKit · Socket.IO · Gemini · pgvector**
