@@ -1,7 +1,10 @@
 # Vidu — Video Communication & AI Document Platform
+# Vidu — Video Communication & AI Document Platform
 
 Vidu is a full-stack web application designed for **video communication and AI-powered document interactions**. Built with **Node.js, Express.js, PostgreSQL, Sequelize, React.js, Tailwind CSS, LiveKit, Socket.IO, and the Gemini API**.
+Vidu is a full-stack web application designed for **video communication and AI-powered document interactions**. Built with **Node.js, Express.js, PostgreSQL, Sequelize, React.js, Tailwind CSS, LiveKit, Socket.IO, and the Gemini API**.
 
+It allows users to engage in real-time video calls and upload documents (PDF, DOCX, TXT) to chat with them utilizing Google's Gemini AI.
 It allows users to engage in real-time video calls and upload documents (PDF, DOCX, TXT) to chat with them utilizing Google's Gemini AI.
 
 ---
@@ -92,9 +95,14 @@ npx sequelize-cli db:migrate
 ```
 
 Start the backend development server:
+Start the backend development server:
 ```bash
 npm run dev
 ```
+The backend should now be running on `http://localhost:5000`.
+
+### 3. Frontend Setup
+Open a new terminal, navigate to the frontend directory, and install dependencies:
 The backend should now be running on `http://localhost:5000`.
 
 ### 3. Frontend Setup
@@ -105,14 +113,33 @@ npm install
 ```
 
 Create a `.env` file in the `frontend/` directory:
+Create a `.env` file in the `frontend/` directory:
 ```env
 VITE_API_URL=http://localhost:5000/api
 ```
 
 Start the Vite development server:
+Start the Vite development server:
 ```bash
 npm run dev
 ```
+Open your browser and navigate to the URL provided by Vite (usually `http://localhost:5173`).
+
+---
+
+## 🗄️ Database Design
+
+The application uses **PostgreSQL + Sequelize**. The core models currently include:
+* `User` (Authentication and profile data)
+* `Document` (Uploaded file metadata and Gemini references)
+* (Additional models are in development for subscriptions and token transactions)
+
+---
+
+## 🔒 Security Notes
+- **Environment Variables**: Never commit your `.env` files to GitHub. Make sure they are listed in your `.gitignore`.
+- **Backend Secrets**: Keep your Gemini API key, LiveKit secrets, JWT Secrets, and Database passwords strictly on the backend. 
+- **Frontend Variables**: Only public variables should use the `VITE_` prefix on the frontend.
 Open your browser and navigate to the URL provided by Vite (usually `http://localhost:5173`).
 
 ---
