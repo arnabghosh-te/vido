@@ -10,6 +10,7 @@ const adminRoutes = require("./routes/adminRoutes");
 const userRoutes = require("./routes/userRoute");
 const authRoutes = require("./routes/authRoutes");
 const transcriptRoutes = require("./routes/transcriptRoute");
+const geminiDocumentRoutes = require("./routes/geminiDocumentRoutes");
 
 
 const app = express();
@@ -48,6 +49,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/users', userRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
 app.use("/api/transcripts", transcriptRoutes);
+app.use("/api/documents", geminiDocumentRoutes);
 
 const { getAllPlans } = require('./controllers/adminController');
 app.get('/api/plans', getAllPlans);

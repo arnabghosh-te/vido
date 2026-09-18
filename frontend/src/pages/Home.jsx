@@ -64,6 +64,9 @@ const Home = () => {
               <Link to="/transcripts" className="text-blue-500 hover:underline">
                 Transcripts
               </Link>
+              <Link to="/chat-document" className="text-blue-500 hover:underline">
+                Document Chat
+              </Link>
               {user?.role === 'SUPER_ADMIN' && (
                 <Link to="/admin" className="text-blue-500 hover:underline">
                   Admin Dashboard

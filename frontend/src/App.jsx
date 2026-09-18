@@ -14,6 +14,7 @@ import Pricing from './pages/Pricing';
 import VideoCall from './pages/VideoCall';
 import Transcripts from './pages/Transcripts';
 import TranscriptDetail from './pages/TranscriptDetail';
+import DocumentChat from './pages/DocumentChat';
 import './index.css';
 
 function App() {
@@ -32,6 +33,7 @@ function App() {
             <Route path="/video-call/:callId" element={<VideoCall />} />
             <Route path="/transcripts" element={<Transcripts />} />
             <Route path="/transcripts/:id" element={<TranscriptDetail />} />
+            <Route path="/chat-document" element={<DocumentChat />} />
           </Route>
 
           <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN']} />}>
