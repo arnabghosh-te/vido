@@ -26,7 +26,19 @@ const createCall = async (req, res, next) => {
     );
 
     const socketService = require("../sockets/index");
+    
+    // Create notification in DB
+    const { Notification } = require("../models");
+    const notification = await Notification.create({
+      userId: receiverId,
+      title: 'Incoming Call',
+      message: `${req.user.name} is calling you.`,
+      type: 'call',
+      isRead: false
+    });
+
     socketService.sendToUser(receiverId, "INCOMING_CALL", { call, caller: req.user });
+    socketService.sendToUser(receiverId, "new_notification", notification);
 
     return res.status(201).json({
       success: true,

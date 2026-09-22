@@ -13,6 +13,28 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "userId",
         as: "subscriptions",
       });
+
+      User.hasMany(models.FriendRequest, {
+        foreignKey: "senderId",
+        as: "sentRequests",
+      });
+      User.hasMany(models.FriendRequest, {
+        foreignKey: "receiverId",
+        as: "receivedRequests",
+      });
+
+      User.belongsToMany(models.User, {
+        through: models.Friend,
+        foreignKey: 'userId1',
+        otherKey: 'userId2',
+        as: 'friends'
+      });
+      User.belongsToMany(models.User, {
+        through: models.Friend,
+        foreignKey: 'userId2',
+        otherKey: 'userId1',
+        as: 'friendsReverse'
+      });
     }
   }
   User.init(

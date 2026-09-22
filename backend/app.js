@@ -11,6 +11,8 @@ const userRoutes = require("./routes/userRoute");
 const authRoutes = require("./routes/authRoutes");
 const transcriptRoutes = require("./routes/transcriptRoute");
 const geminiDocumentRoutes = require("./routes/geminiDocumentRoutes");
+const friendRoutes = require("./routes/friendRoute");
+const notificationRoutes = require("./routes/notificationRoute");
 
 
 const app = express();
@@ -50,6 +52,8 @@ app.use('/api/users', userRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
 app.use("/api/transcripts", transcriptRoutes);
 app.use("/api/documents", geminiDocumentRoutes);
+app.use("/api/friends", friendRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 const { getAllPlans } = require('./controllers/adminController');
 app.get('/api/plans', getAllPlans);
