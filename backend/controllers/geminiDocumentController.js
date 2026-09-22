@@ -1,4 +1,4 @@
-const { Document } = require("../models");
+const { Document, DocumentChat } = require("../models");
 const path = require("path");
 const { GoogleGenAI } = require("@google/genai");
 
@@ -164,6 +164,20 @@ exports.queryDocument = async (req, res, next) => {
 
     const answer = formatGeminiResponse(rawAnswer);
 
+    // Save chat history
+    await DocumentChat.create({
+      documentId: document.id,
+      userId,
+      role: "user",
+      text: question.trim(),
+    });
+    
+    await DocumentChat.create({
+      documentId: document.id,
+      userId,
+      role: "bot",
+      text: answer,
+    });
 
     return res.status(200).json({
       success: true,
@@ -213,6 +227,48 @@ exports.getUserDocuments = async (req, res, next) => {
     return res.status(500).json({
       success: false,
       message: "Failed to fetch documents",
+      data: null,
+    });
+  }
+};
+
+/**
+ * Get chat history for a specific document
+ */
+exports.getDocumentChats = async (req, res, next) => {
+  try {
+    const { documentId } = req.params;
+    const userId = req.user.id;
+
+    // Check if document belongs to user
+    const document = await Document.findOne({
+      where: { id: documentId, userId },
+    });
+
+    if (!document) {
+      return res.status(404).json({
+        success: false,
+        message: "Document not found",
+        data: null,
+      });
+    }
+
+    const chats = await DocumentChat.findAll({
+      where: { documentId, userId },
+      order: [["createdAt", "ASC"]],
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Chats fetched successfully",
+      data: chats,
+    });
+  } catch (error) {
+    console.error("Get document chats error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch document chats",
       data: null,
     });
   }

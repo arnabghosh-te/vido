@@ -35,6 +35,10 @@ module.exports = (sequelize, DataTypes) => {
         otherKey: 'userId1',
         as: 'friendsReverse'
       });
+      User.hasMany(models.DocumentChat, {
+        foreignKey: 'userId',
+        as: 'documentChats'
+      });
     }
   }
   User.init(

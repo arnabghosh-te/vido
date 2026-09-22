@@ -8,6 +8,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "userId",
         as: "user",
       });
+      Document.hasMany(models.DocumentChat, {
+        foreignKey: "documentId",
+        as: "chats",
+      });
     }
   }
   Document.init(

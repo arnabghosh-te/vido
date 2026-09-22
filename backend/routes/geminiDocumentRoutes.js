@@ -2,7 +2,7 @@ const express = require("express");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
-const { uploadDocument, queryDocument, getUserDocuments } = require("../controllers/geminiDocumentController");
+const { uploadDocument, queryDocument, getUserDocuments, getDocumentChats } = require("../controllers/geminiDocumentController");
 const { authenticate } = require("../middleware/auth");
 
 const router = express.Router();
@@ -36,5 +36,6 @@ const upload = multer({
 router.post("/upload", authenticate, upload.single("document"), uploadDocument);
 router.post("/query", authenticate, queryDocument);
 router.get("/", authenticate, getUserDocuments);
+router.get("/:documentId/chats", authenticate, getDocumentChats);
 
 module.exports = router;
