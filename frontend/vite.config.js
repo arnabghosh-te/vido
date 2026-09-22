@@ -12,10 +12,24 @@ export default defineConfig({
         target: "http://localhost:5000",
         changeOrigin: true,
       },
+      "/uploads": {
+        target: "http://localhost:5000",
+        changeOrigin: true,
+      },
       "/socket.io": {
         target: "http://localhost:5000",
         ws: true,
+        changeOrigin: true,
       },
+      "/rtc": {
+        target: "http://localhost:7880",
+        ws: true,
+        changeOrigin: true,
+      },
+      "/twirp": {
+        target: "http://localhost:7880",
+        changeOrigin: true,
+      }
     },
   },
 });
