@@ -1,6 +1,7 @@
 # Vidu — Video Communication & AI Document Platform
 # Vidu — Video Communication & AI Document Platform
 
+#Run this commands on terminal for successfull compilation of the project
 
 stripe listen --forward-to localhost:5000/api/stripe/webhook
 cloudflared tunnel --url http://localhost:5173
