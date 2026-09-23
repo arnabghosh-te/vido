@@ -1,18 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { getActiveUsers, sendFriendRequest, cancelFriendRequest } from '../api/friendApi';
 import { getImageUrl } from '../utils/imageHelper';
+import { useSocket } from '../context/SocketContext';
 
 const UsersList = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const { socket } = useSocket();
+
   useEffect(() => {
     fetchUsers();
-  }, []);
 
-  const fetchUsers = async () => {
+    if (socket) {
+      const handleStateChanged = () => {
+        fetchUsers(false);
+      };
+      
+      socket.on('FRIEND_STATE_CHANGED', handleStateChanged);
+      
+      return () => {
+        socket.off('FRIEND_STATE_CHANGED', handleStateChanged);
+      };
+    }
+  }, [socket]);
+
+  const fetchUsers = async (showLoading = true) => {
     try {
-      setLoading(true);
+      if (showLoading) setLoading(true);
       const res = await getActiveUsers();
       if (res.success) {
         setUsers(res.users);

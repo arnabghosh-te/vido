@@ -110,6 +110,8 @@ exports.sendRequest = async (req, res) => {
     });
 
     sendToUser(receiverId, 'new_notification', notification);
+    sendToUser(receiverId, 'FRIEND_STATE_CHANGED', {});
+    sendToUser(senderId, 'FRIEND_STATE_CHANGED', {});
 
     res.status(201).json({ success: true, message: "Friend request sent.", request });
   } catch (error) {
@@ -147,6 +149,8 @@ exports.acceptRequest = async (req, res) => {
     });
 
     sendToUser(request.senderId, 'new_notification', notification);
+    sendToUser(request.senderId, 'FRIEND_STATE_CHANGED', {});
+    sendToUser(request.receiverId, 'FRIEND_STATE_CHANGED', {});
 
     res.status(200).json({ success: true, message: "Friend request accepted." });
   } catch (error) {
@@ -169,6 +173,9 @@ exports.rejectRequest = async (req, res) => {
 
     request.status = 'rejected';
     await request.save();
+
+    sendToUser(request.senderId, 'FRIEND_STATE_CHANGED', {});
+    sendToUser(request.receiverId, 'FRIEND_STATE_CHANGED', {});
 
     res.status(200).json({ success: true, message: "Friend request rejected." });
   } catch (error) {
@@ -232,6 +239,9 @@ exports.cancelRequest = async (req, res) => {
 
     await request.destroy();
 
+    sendToUser(senderId, 'FRIEND_STATE_CHANGED', {});
+    sendToUser(receiverId, 'FRIEND_STATE_CHANGED', {});
+
     res.status(200).json({ success: true, message: "Friend request cancelled." });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -259,6 +269,8 @@ exports.removeFriend = async (req, res) => {
     await friend.destroy();
 
     sendToUser(friendId, 'FRIEND_REMOVED', { friendId: userId });
+    sendToUser(friendId, 'FRIEND_STATE_CHANGED', {});
+    sendToUser(userId, 'FRIEND_STATE_CHANGED', {});
 
     res.status(200).json({ success: true, message: "Friend removed successfully." });
   } catch (error) {

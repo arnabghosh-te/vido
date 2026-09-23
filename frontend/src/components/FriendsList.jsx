@@ -24,17 +24,23 @@ const FriendsList = () => {
         setFriends(prev => prev.filter(f => f.id !== data.friendId));
       };
       
+      const handleStateChanged = () => {
+        fetchFriends(false);
+      };
+      
       socket.on('FRIEND_REMOVED', handleFriendRemoved);
+      socket.on('FRIEND_STATE_CHANGED', handleStateChanged);
       
       return () => {
         socket.off('FRIEND_REMOVED', handleFriendRemoved);
+        socket.off('FRIEND_STATE_CHANGED', handleStateChanged);
       };
     }
   }, [socket]);
 
-  const fetchFriends = async () => {
+  const fetchFriends = async (showLoading = true) => {
     try {
-      setLoading(true);
+      if (showLoading) setLoading(true);
       const res = await getFriends();
       if (res.success) {
         setFriends(res.friends);
