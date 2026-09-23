@@ -1,8 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getCurrentSubscription, getSubscriptionHistory } from '../api/subscriptionApi';
+import { getImageUrl } from '../utils/imageHelper';
 import './Profile.css';
-import { useEffect } from 'react';
 
 function Profile() {
   const { user, updateProfile, changePassword } = useAuth();
@@ -10,7 +10,7 @@ function Profile() {
   // Profile Update State
   const [name, setName] = useState(user?.name || '');
   const [profilePicture, setProfilePicture] = useState(null);
-  const [preview, setPreview] = useState(user?.profilePicture || null);
+  const [preview, setPreview] = useState(user?.profilePicture ? getImageUrl(user.profilePicture) : null);
   const [profileMsg, setProfileMsg] = useState('');
   const fileInputRef = useRef(null);
 
@@ -204,12 +204,12 @@ function Profile() {
 
             <h4>Active Plan</h4>
             {currentSub ? (
-              <div style={{ background: '#f9fafb', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem', border: '1px solid #e5e7eb' }}>
-                <p><strong>Status:</strong> <span style={{ color: currentSub.status === 'ACTIVE' ? 'green' : 'red', fontWeight: 'bold' }}>{currentSub.status}</span></p>
+              <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg mb-6 border border-gray-200 dark:border-gray-700">
+                <p><strong>Status:</strong> <span style={{ color: currentSub.status === 'ACTIVE' ? '#22c55e' : '#ef4444', fontWeight: 'bold' }}>{currentSub.status}</span></p>
                 <p><strong>Valid Until:</strong> {new Date(currentSub.endDate).toLocaleDateString()}</p>
               </div>
             ) : (
-              <p style={{ marginBottom: '1.5rem', color: '#6b7280' }}>You do not have an active subscription.</p>
+              <p className="mb-6 text-gray-500 dark:text-gray-400">You do not have an active subscription.</p>
             )}
 
             <h4>Subscription History</h4>
@@ -217,27 +217,27 @@ function Profile() {
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '0.5rem' }}>
                   <thead>
-                    <tr style={{ background: '#f3f4f6', textAlign: 'left' }}>
-                      <th style={{ padding: '0.75rem', borderBottom: '1px solid #e5e7eb' }}>Plan ID</th>
-                      <th style={{ padding: '0.75rem', borderBottom: '1px solid #e5e7eb' }}>Status</th>
-                      <th style={{ padding: '0.75rem', borderBottom: '1px solid #e5e7eb' }}>Start Date</th>
-                      <th style={{ padding: '0.75rem', borderBottom: '1px solid #e5e7eb' }}>End Date</th>
+                    <tr className="bg-gray-100 dark:bg-gray-700 text-left">
+                      <th className="p-3 border-b border-gray-200 dark:border-gray-600">Plan ID</th>
+                      <th className="p-3 border-b border-gray-200 dark:border-gray-600">Status</th>
+                      <th className="p-3 border-b border-gray-200 dark:border-gray-600">Start Date</th>
+                      <th className="p-3 border-b border-gray-200 dark:border-gray-600">End Date</th>
                     </tr>
                   </thead>
                   <tbody>
                     {subHistory.map(sub => (
-                      <tr key={sub.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
-                        <td style={{ padding: '0.75rem' }}>{sub.subscriptionPlanId}</td>
-                        <td style={{ padding: '0.75rem' }}>{sub.status}</td>
-                        <td style={{ padding: '0.75rem' }}>{new Date(sub.startDate).toLocaleDateString()}</td>
-                        <td style={{ padding: '0.75rem' }}>{new Date(sub.endDate).toLocaleDateString()}</td>
+                      <tr key={sub.id} className="border-b border-gray-200 dark:border-gray-700">
+                        <td className="p-3">{sub.subscriptionPlanId}</td>
+                        <td className="p-3">{sub.status}</td>
+                        <td className="p-3">{new Date(sub.startDate).toLocaleDateString()}</td>
+                        <td className="p-3">{new Date(sub.endDate).toLocaleDateString()}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
             ) : (
-              <p style={{ color: '#6b7280' }}>No past subscriptions found.</p>
+              <p className="text-gray-500 dark:text-gray-400">No past subscriptions found.</p>
             )}
           </div>
         )}

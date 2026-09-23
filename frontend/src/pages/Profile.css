@@ -2,6 +2,28 @@
   --primary-color: #0284c7;
   --surface: #ffffff;
   --text-primary: #333333;
+  --border-color: #e2e8f0;
+  --input-bg: #fff;
+  --input-disabled-bg: #f1f5f9;
+  --avatar-bg: #f8fafc;
+  --avatar-color: #64748b;
+  --btn-secondary: #475569;
+  --msg-bg: #e0f2fe;
+  --msg-color: #0369a1;
+}
+
+html.dark, .dark {
+  --primary-color: #38bdf8;
+  --surface: #1f2937;
+  --text-primary: #f9fafb;
+  --border-color: #374151;
+  --input-bg: #374151;
+  --input-disabled-bg: #111827;
+  --avatar-bg: #374151;
+  --avatar-color: #9ca3af;
+  --btn-secondary: #4b5563;
+  --msg-bg: #1e3a8a;
+  --msg-color: #bfdbfe;
 }
 
 .profile-container {
@@ -12,6 +34,7 @@
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   color: var(--text-primary);
+  transition: background-color 0.2s, color 0.2s;
 }
 
 .profile-container h2 {
@@ -24,7 +47,7 @@
 .profile-section {
   margin-bottom: 3rem;
   padding-bottom: 2rem;
-  border-bottom: 1px solid var(--border-color, #e2e8f0);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .profile-section:last-child {
@@ -56,14 +79,14 @@
 
 .form-group input {
   padding: 0.75rem;
-  border: 1px solid var(--border-color, #ccc);
+  border: 1px solid var(--border-color);
   border-radius: 4px;
-  background-color: var(--input-bg, #fff);
+  background-color: var(--input-bg);
   color: var(--text-primary);
 }
 
 .form-group input:disabled {
-  background-color: #f1f5f9;
+  background-color: var(--input-disabled-bg);
   cursor: not-allowed;
 }
 
@@ -81,8 +104,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #f8fafc;
-  transition: opacity 0.2s;
+  background-color: var(--avatar-bg);
+  transition: opacity 0.2s, background-color 0.2s;
 }
 
 .avatar-preview:hover {
@@ -96,7 +119,7 @@
 }
 
 .avatar-placeholder {
-  color: #64748b;
+  color: var(--avatar-color);
   font-weight: 500;
 }
 
@@ -115,7 +138,7 @@
 }
 
 .btn-secondary {
-  background-color: #475569;
+  background-color: var(--btn-secondary);
   color: white;
 }
 
@@ -125,8 +148,8 @@
 
 .msg {
   padding: 0.75rem;
-  background-color: #e0f2fe;
-  color: #0369a1;
+  background-color: var(--msg-bg);
+  color: var(--msg-color);
   border-radius: 4px;
   margin-bottom: 1rem;
 }

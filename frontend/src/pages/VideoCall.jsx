@@ -147,10 +147,10 @@ const VideoCall = () => {
     }
   };
 
-  if (!token) return <div className="p-8">Loading...</div>;
+  if (!token) return <div className="p-8 text-gray-900 dark:text-white">Loading...</div>;
 
   return (
-    <div className="flex h-screen bg-gray-900 text-white">
+    <div className="flex h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-200">
       {/* Video Area */}
       <div className="flex-1 flex flex-col relative" data-lk-theme="default">
         <LiveKitRoom
@@ -167,17 +167,17 @@ const VideoCall = () => {
       </div>
 
       {/* Sidebar for Transcripts */}
-      <div className="w-80 bg-gray-800 border-l border-gray-700 p-4 flex flex-col">
+      <div className="w-80 bg-gray-50 dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 p-4 flex flex-col transition-colors duration-200">
         <h2 className="text-xl font-bold mb-4">Live Transcript</h2>
-        <div className="flex-1 overflow-y-auto mb-4 bg-gray-900 p-2 rounded">
-          <p className="text-sm text-gray-400 mb-2">Transcript saving is active. Type below to simulate a transcript chunk.</p>
+        <div className="flex-1 overflow-y-auto mb-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-transparent p-2 rounded transition-colors duration-200">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Transcript saving is active. Type below to simulate a transcript chunk.</p>
           {localTranscripts.map((t, i) => (
-            <div key={i} className="mb-2 bg-gray-800 p-2 rounded text-sm text-gray-200">
+            <div key={i} className="mb-2 bg-gray-100 dark:bg-gray-800 p-2 rounded text-sm text-gray-800 dark:text-gray-200 transition-colors duration-200">
               {t}
             </div>
           ))}
           {interimTranscript && (
-            <div className="mb-2 bg-gray-700 p-2 rounded text-sm text-gray-400 italic">
+            <div className="mb-2 bg-gray-200 dark:bg-gray-700 p-2 rounded text-sm text-gray-600 dark:text-gray-400 italic transition-colors duration-200">
               [You speaking...]: {interimTranscript}
             </div>
           )}
@@ -186,7 +186,7 @@ const VideoCall = () => {
         <div className="mt-auto">
           <button
             onClick={toggleTranscription}
-            className={`w-full py-2 rounded mb-4 font-bold ${
+            className={`w-full py-2 rounded mb-4 font-bold text-white transition-colors ${
               isListening ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-600 hover:bg-gray-700'
             }`}
           >
@@ -194,7 +194,7 @@ const VideoCall = () => {
           </button>
           
           <textarea
-            className="w-full p-2 bg-gray-700 text-white rounded mb-2"
+            className="w-full p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-transparent rounded mb-2 transition-colors duration-200"
             rows="3"
             placeholder="Type transcript segment..."
             value={transcriptText}
@@ -202,13 +202,13 @@ const VideoCall = () => {
           ></textarea>
           <button
             onClick={handleSendTranscript}
-            className="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded mb-2"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded mb-2 transition-colors"
           >
             Send Transcript
           </button>
           <button
             onClick={handleEndCall}
-            className="w-full bg-red-600 hover:bg-red-700 py-2 rounded"
+            className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded transition-colors"
           >
             End Call
           </button>

@@ -87,22 +87,22 @@ const TranscriptDetail = () => {
   return (
     <div className="p-8 max-w-4xl mx-auto">
       <Link to="/transcripts" className="text-blue-500 hover:underline mb-4 inline-block">&larr; Back to Transcripts</Link>
-      <div className="bg-white p-6 rounded shadow mb-6">
+      <div className="bg-white dark:bg-gray-800 p-6 rounded shadow mb-6 transition-colors duration-200">
         <div className="flex justify-between items-start mb-2">
-          <h1 className="text-2xl font-bold">{transcript.title}</h1>
+          <h1 className="text-2xl font-bold dark:text-white">{transcript.title}</h1>
         </div>
-        <p className="text-sm text-gray-500 mb-6">
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
           Created: {new Date(transcript.createdAt).toLocaleString()} | Call ID: {transcript.callId}
         </p>
 
         <div className="mb-8">
-          <div className="flex items-center justify-between border-b pb-2 mb-4">
-            <h2 className="text-lg font-semibold">AI Summary</h2>
+          <div className="flex items-center justify-between border-b dark:border-gray-700 pb-2 mb-4">
+            <h2 className="text-lg font-semibold dark:text-gray-100">AI Summary</h2>
             <div className="flex space-x-2">
               {transcript.summary && (
                 <button
                   onClick={() => handleDownloadDoc(`${transcript.title} - Summary`, transcript.summary)}
-                  className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                  className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded hover:bg-blue-200 dark:hover:bg-blue-900/50"
                 >
                   Download Summary (.doc)
                 </button>
@@ -111,7 +111,7 @@ const TranscriptDetail = () => {
                 <button
                   onClick={handleGenerateSummary}
                   disabled={generatingSummary}
-                  className="px-3 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 disabled:opacity-50"
+                  className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded hover:bg-green-200 dark:hover:bg-green-900/50 disabled:opacity-50"
                 >
                   {generatingSummary ? 'Generating...' : 'Generate Summary'}
                 </button>
@@ -122,7 +122,7 @@ const TranscriptDetail = () => {
           {summaryError && <p className="text-red-500 mb-4">{summaryError}</p>}
           
           {transcript.summary ? (
-            <div className="bg-blue-50 p-4 rounded text-gray-800 whitespace-pre-wrap border border-blue-100 shadow-sm">
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded text-gray-800 dark:text-gray-200 whitespace-pre-wrap border border-blue-100 dark:border-blue-800 shadow-sm">
               {transcript.summary}
             </div>
           ) : (
@@ -130,32 +130,32 @@ const TranscriptDetail = () => {
           )}
         </div>
 
-        <div className="flex items-center justify-between border-b pb-2 mb-4">
-          <h2 className="text-lg font-semibold">Full Text</h2>
+        <div className="flex items-center justify-between border-b dark:border-gray-700 pb-2 mb-4">
+          <h2 className="text-lg font-semibold dark:text-gray-100">Full Text</h2>
           {transcript.fullText && (
             <button
               onClick={() => handleDownloadDoc(`${transcript.title} - Full Transcript`, transcript.fullText)}
-              className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+              className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded hover:bg-blue-200 dark:hover:bg-blue-900/50"
             >
               Download Full Transcript (.doc)
             </button>
           )}
         </div>
         
-        <div className="bg-gray-50 p-4 rounded mb-6 whitespace-pre-wrap text-gray-800">
+        <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded mb-6 whitespace-pre-wrap text-gray-800 dark:text-gray-200">
           {transcript.fullText || "No text available."}
         </div>
 
-        <h2 className="text-lg font-semibold mb-4 border-b pb-2">Segments</h2>
+        <h2 className="text-lg font-semibold mb-4 border-b dark:border-gray-700 pb-2 dark:text-gray-100">Segments</h2>
         {transcript.segments && transcript.segments.length > 0 ? (
           <div className="space-y-4">
             {transcript.segments.map((segment) => (
-              <div key={segment.id} className="bg-gray-100 p-3 rounded">
-                <div className="text-xs text-gray-500 mb-1 flex justify-between">
+              <div key={segment.id} className="bg-gray-100 dark:bg-gray-700 p-3 rounded">
+                <div className="text-xs text-gray-500 dark:text-gray-400 mb-1 flex justify-between">
                   <span>Speaker {segment.speakerId} ({segment.language})</span>
                   <span>{new Date(segment.startTime).toLocaleTimeString()}</span>
                 </div>
-                <p className="text-gray-800">{segment.text}</p>
+                <p className="text-gray-800 dark:text-gray-200">{segment.text}</p>
               </div>
             ))}
           </div>
@@ -164,18 +164,18 @@ const TranscriptDetail = () => {
         )}
       </div>
 
-      <div className="bg-white p-6 rounded shadow">
-        <h2 className="text-xl font-bold mb-4 border-b pb-2">Chat with Transcript</h2>
-        <div className="h-64 overflow-y-auto mb-4 p-4 border rounded bg-gray-50 flex flex-col space-y-4">
+      <div className="bg-white dark:bg-gray-800 p-6 rounded shadow transition-colors duration-200">
+        <h2 className="text-xl font-bold mb-4 border-b dark:border-gray-700 pb-2 dark:text-white">Chat with Transcript</h2>
+        <div className="h-64 overflow-y-auto mb-4 p-4 border dark:border-gray-700 rounded bg-gray-50 dark:bg-gray-900 flex flex-col space-y-4">
           {chatMessages.length === 0 ? (
-            <p className="text-gray-500 text-center m-auto">Ask a question about this transcript!</p>
+            <p className="text-gray-500 dark:text-gray-400 text-center m-auto">Ask a question about this transcript!</p>
           ) : (
             chatMessages.map((msg, idx) => (
               <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[80%] p-3 rounded-lg ${
                   msg.role === 'user' ? 'bg-blue-500 text-white rounded-br-none' : 
-                  msg.role === 'error' ? 'bg-red-100 text-red-700 rounded-bl-none' : 'bg-white border text-gray-800 rounded-bl-none'
-                } whitespace-pre-wrap`}>
+                  msg.role === 'error' ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-bl-none' : 'bg-white dark:bg-gray-800 border dark:border-gray-700 text-gray-800 dark:text-gray-200 rounded-bl-none'
+                } whitespace-pre-wrap shadow-sm`}>
                   {msg.content}
                 </div>
               </div>
@@ -183,7 +183,7 @@ const TranscriptDetail = () => {
           )}
           {isChatting && (
             <div className="flex justify-start">
-              <div className="max-w-[80%] p-3 rounded-lg bg-white border text-gray-500 rounded-bl-none">
+              <div className="max-w-[80%] p-3 rounded-lg bg-white dark:bg-gray-800 border dark:border-gray-700 text-gray-500 dark:text-gray-400 rounded-bl-none shadow-sm">
                 AI is typing...
               </div>
             </div>
@@ -197,7 +197,7 @@ const TranscriptDetail = () => {
             value={chatInput}
             onChange={(e) => setChatInput(e.target.value)}
             placeholder="Ask something..."
-            className="flex-1 p-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
+            className="flex-1 p-2 border dark:border-gray-700 rounded focus:outline-none focus:ring focus:border-blue-300 dark:bg-gray-700 dark:text-white"
             disabled={isChatting}
           />
           <button 

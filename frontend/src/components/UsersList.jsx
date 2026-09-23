@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getActiveUsers, sendFriendRequest, cancelFriendRequest } from '../api/friendApi';
+import { getImageUrl } from '../utils/imageHelper';
 
 const UsersList = () => {
   const [users, setUsers] = useState([]);
@@ -62,7 +63,7 @@ const UsersList = () => {
               <div className="flex items-center w-full">
                 {user.profilePicture || user.profileImage ? (
                   <img 
-                    src={user.profilePicture || user.profileImage} 
+                    src={getImageUrl(user.profilePicture || user.profileImage)} 
                     alt={user.name} 
                     className="w-10 h-10 rounded-full flex-shrink-0 object-cover mr-3" 
                     onError={(e) => {

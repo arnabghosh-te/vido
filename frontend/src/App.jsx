@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import GlobalBackButton from './components/GlobalBackButton';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
@@ -22,6 +23,7 @@ function App() {
     <AuthProvider>
       <Router>
         <SocketProvider>
+          <GlobalBackButton />
           <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />

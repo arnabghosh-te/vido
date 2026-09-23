@@ -6,8 +6,8 @@ const Sidebar = () => {
   const { logout } = useAuth();
 
   return (
-    <div className="w-64 bg-gray-800 text-white min-h-screen flex flex-col">
-      <div className="p-4 border-b border-gray-700">
+    <div className="w-64 bg-white dark:bg-gray-800 text-gray-900 dark:text-white min-h-screen flex flex-col border-r border-gray-200 dark:border-gray-700 transition-colors duration-200">
+      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
         <h2 className="text-2xl font-bold">Admin Panel</h2>
       </div>
       <nav className="mt-4 flex-1">
@@ -17,7 +17,7 @@ const Sidebar = () => {
               to="/admin"
               end
               className={({ isActive }) =>
-                `block px-4 py-2 hover:bg-gray-700 ${isActive ? 'bg-gray-700 border-l-4 border-blue-500' : ''}`
+                `block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${isActive ? 'bg-gray-100 dark:bg-gray-700 border-l-4 border-blue-500' : ''}`
               }
             >
               Dashboard
@@ -27,7 +27,7 @@ const Sidebar = () => {
             <NavLink
               to="/admin/users"
               className={({ isActive }) =>
-                `block px-4 py-2 hover:bg-gray-700 ${isActive ? 'bg-gray-700 border-l-4 border-blue-500' : ''}`
+                `block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${isActive ? 'bg-gray-100 dark:bg-gray-700 border-l-4 border-blue-500' : ''}`
               }
             >
               User Management
@@ -37,7 +37,7 @@ const Sidebar = () => {
             <NavLink
               to="/admin/plans"
               className={({ isActive }) =>
-                `block px-4 py-2 hover:bg-gray-700 ${isActive ? 'bg-gray-700 border-l-4 border-blue-500' : ''}`
+                `block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${isActive ? 'bg-gray-100 dark:bg-gray-700 border-l-4 border-blue-500' : ''}`
               }
             >
               Subscription Plans
@@ -47,17 +47,17 @@ const Sidebar = () => {
             <NavLink
               to="/profile"
               className={({ isActive }) =>
-                `block px-4 py-2 hover:bg-gray-700 ${isActive ? 'bg-gray-700 border-l-4 border-blue-500' : ''}`
+                `block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${isActive ? 'bg-gray-100 dark:bg-gray-700 border-l-4 border-blue-500' : ''}`
               }
             >
               My Profile
             </NavLink>
           </li>
-          <li className="mb-2 mt-4 pt-4 border-t border-gray-700">
+          <li className="mb-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
             <NavLink
               to="/"
               className={({ isActive }) =>
-                `block px-4 py-2 hover:bg-gray-700 ${isActive ? 'bg-gray-700 border-l-4 border-blue-500' : ''}`
+                `block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${isActive ? 'bg-gray-100 dark:bg-gray-700 border-l-4 border-blue-500' : ''}`
               }
             >
               Back to Home
@@ -65,7 +65,7 @@ const Sidebar = () => {
           </li>
         </ul>
       </nav>
-      <div className="p-4 border-t border-gray-700">
+      <div className="p-4 border-t border-gray-200 dark:border-gray-700">
         <button
           onClick={logout}
           className="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition duration-150"

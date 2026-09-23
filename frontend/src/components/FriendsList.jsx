@@ -4,6 +4,8 @@ import { createCall } from '../api/callApi';
 import { useNavigate } from 'react-router-dom';
 import { useSocket } from '../context/SocketContext';
 
+import { getImageUrl } from '../utils/imageHelper';
+
 const FriendsList = () => {
   const [friends, setFriends] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -87,7 +89,7 @@ const FriendsList = () => {
               <div className="flex items-center flex-1 min-w-0">
                 {friend.profilePicture || friend.profileImage ? (
                   <img 
-                    src={friend.profilePicture || friend.profileImage} 
+                    src={getImageUrl(friend.profilePicture || friend.profileImage)} 
                     alt={friend.name} 
                     className="w-10 h-10 rounded-full flex-shrink-0 object-cover mr-3" 
                     onError={(e) => {
