@@ -157,7 +157,7 @@ const VideoCall = () => {
           video={true}
           audio={true}
           token={token}
-          serverUrl={import.meta.env.VITE_LIVEKIT_URL || 'ws://localhost:7880'}
+          serverUrl={import.meta.env.VITE_LIVEKIT_URL || (window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host}
           onDisconnected={handleEndCall}
           className="h-full w-full"
         >

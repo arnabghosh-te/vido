@@ -10,7 +10,7 @@ function Profile() {
   // Profile Update State
   const [name, setName] = useState(user?.name || '');
   const [profilePicture, setProfilePicture] = useState(null);
-  const [preview, setPreview] = useState(user?.profilePicture ? `http://localhost:5000${user.profilePicture}` : null);
+  const [preview, setPreview] = useState(user?.profilePicture || null);
   const [profileMsg, setProfileMsg] = useState('');
   const fileInputRef = useRef(null);
 

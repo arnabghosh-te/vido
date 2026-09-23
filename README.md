@@ -1,6 +1,11 @@
 # Vidu — Video Communication & AI Document Platform
 # Vidu — Video Communication & AI Document Platform
 
+
+stripe listen --forward-to localhost:5000/api/stripe/webhook
+cloudflared tunnel --url http://localhost:5173
+livekit-server --dev
+
 Vidu is a full-stack web application designed for **video communication and AI-powered document interactions**. Built with **Node.js, Express.js, PostgreSQL, Sequelize, React.js, Tailwind CSS, LiveKit, Socket.IO, and the Gemini API**.
 Vidu is a full-stack web application designed for **video communication and AI-powered document interactions**. Built with **Node.js, Express.js, PostgreSQL, Sequelize, React.js, Tailwind CSS, LiveKit, Socket.IO, and the Gemini API**.
 

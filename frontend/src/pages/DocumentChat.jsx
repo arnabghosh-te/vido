@@ -82,6 +82,24 @@ const DocumentChat = () => {
     }
   };
 
+  const fetchChats = async (documentId) => {
+    setIsLoading(true);
+    try {
+      const res = await axios.get(`/api/documents/${documentId}/chats`);
+      setMessages(res.data.data.map(chat => ({ role: chat.role, text: chat.text })));
+    } catch (err) {
+      console.error("Error fetching chats", err);
+      setMessages([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDocumentSelect = (doc) => {
+    setSelectedDocument(doc);
+    fetchChats(doc.id);
+  };
+
   return (
     <div className="flex h-[calc(100vh-64px)] bg-gray-50">
       {/* Sidebar */}
@@ -105,10 +123,7 @@ const DocumentChat = () => {
           {documents.map((doc) => (
             <div
               key={doc.id}
-              onClick={() => {
-                setSelectedDocument(doc);
-                setMessages([]);
-              }}
+              onClick={() => handleDocumentSelect(doc)}
               className={`p-3 rounded-md cursor-pointer mb-2 truncate ${selectedDocument?.id === doc.id ? "bg-blue-100 text-blue-700 font-medium" : "hover:bg-gray-100 text-gray-700"}`}
             >
               {doc.originalName}
