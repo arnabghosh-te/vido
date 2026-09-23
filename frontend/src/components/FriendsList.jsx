@@ -1,17 +1,34 @@
 import React, { useState, useEffect } from 'react';
-import { getFriends } from '../api/friendApi';
+import { getFriends, removeFriend } from '../api/friendApi';
 import { createCall } from '../api/callApi';
 import { useNavigate } from 'react-router-dom';
+import { useSocket } from '../context/SocketContext';
 
 const FriendsList = () => {
   const [friends, setFriends] = useState([]);
   const [loading, setLoading] = useState(true);
   const [callingId, setCallingId] = useState(null);
+  const [removingId, setRemovingId] = useState(null);
   const navigate = useNavigate();
+  const { socket } = useSocket();
 
   useEffect(() => {
     fetchFriends();
   }, []);
+
+  useEffect(() => {
+    if (socket) {
+      const handleFriendRemoved = (data) => {
+        setFriends(prev => prev.filter(f => f.id !== data.friendId));
+      };
+      
+      socket.on('FRIEND_REMOVED', handleFriendRemoved);
+      
+      return () => {
+        socket.off('FRIEND_REMOVED', handleFriendRemoved);
+      };
+    }
+  }, [socket]);
 
   const fetchFriends = async () => {
     try {
@@ -40,6 +57,22 @@ const FriendsList = () => {
     }
   };
 
+  const handleRemoveFriend = async (friendId) => {
+    if (!window.confirm("Are you sure you want to remove this friend?")) return;
+    try {
+      setRemovingId(friendId);
+      const res = await removeFriend(friendId);
+      if (res.success) {
+        setFriends(friends.filter(f => f.id !== friendId));
+      }
+    } catch (error) {
+      console.error("Failed to remove friend", error);
+      alert(error?.response?.data?.message || "Failed to remove friend");
+    } finally {
+      setRemovingId(null);
+    }
+  };
+
   if (loading) return <div className="dark:text-gray-300">Loading friends...</div>;
 
   return (
@@ -51,7 +84,7 @@ const FriendsList = () => {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {friends.map((friend) => (
             <div key={friend.id} className="flex flex-col sm:flex-row items-center sm:justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg space-y-3 sm:space-y-0 transition-colors duration-200">
-              <div className="flex items-center w-full">
+              <div className="flex items-center flex-1 min-w-0">
                 {friend.profilePicture || friend.profileImage ? (
                   <img 
                     src={friend.profilePicture || friend.profileImage} 
@@ -71,13 +104,22 @@ const FriendsList = () => {
                   <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{friend.name}</p>
                 </div>
               </div>
-              <button
-                onClick={() => handleCallUser(friend.id)}
-                disabled={callingId === friend.id}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-1 text-sm rounded transition duration-150 disabled:bg-gray-400"
-              >
-                {callingId === friend.id ? 'Calling...' : 'Call'}
-              </button>
+              <div className="flex space-x-2 flex-shrink-0 mt-3 sm:mt-0">
+                <button
+                  onClick={() => handleCallUser(friend.id)}
+                  disabled={callingId === friend.id || removingId === friend.id}
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-1 text-sm rounded transition duration-150 disabled:bg-gray-400"
+                >
+                  {callingId === friend.id ? 'Calling...' : 'Call'}
+                </button>
+                <button
+                  onClick={() => handleRemoveFriend(friend.id)}
+                  disabled={callingId === friend.id || removingId === friend.id}
+                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-1 text-sm rounded transition duration-150 disabled:bg-gray-400"
+                >
+                  {removingId === friend.id ? 'Removing...' : 'Remove'}
+                </button>
+              </div>
             </div>
           ))}
         </div>

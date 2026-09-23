@@ -53,6 +53,16 @@ const Sidebar = () => {
               My Profile
             </NavLink>
           </li>
+          <li className="mb-2 mt-4 pt-4 border-t border-gray-700">
+            <NavLink
+              to="/"
+              className={({ isActive }) =>
+                `block px-4 py-2 hover:bg-gray-700 ${isActive ? 'bg-gray-700 border-l-4 border-blue-500' : ''}`
+              }
+            >
+              Back to Home
+            </NavLink>
+          </li>
         </ul>
       </nav>
       <div className="p-4 border-t border-gray-700">

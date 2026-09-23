@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../../components/Sidebar';
-import { fetchAdminPlans, createPlan, deactivatePlan } from '../../api/planApi';
+import { fetchAdminPlans, createPlan, deactivatePlan, reactivatePlan, updatePlan } from '../../api/planApi';
 
 const PlanManagement = () => {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [editingPlanId, setEditingPlanId] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -34,21 +35,45 @@ const PlanManagement = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleCreatePlan = async (e) => {
+  const handleSubmitPlan = async (e) => {
     e.preventDefault();
     try {
-      await createPlan({
+      const planData = {
         ...formData,
         price: parseFloat(formData.price),
         tokensIncluded: parseInt(formData.tokensIncluded, 10),
         durationInDays: parseInt(formData.durationInDays, 10)
-      });
-      setShowModal(false);
-      setFormData({ name: '', description: '', price: '', tokensIncluded: '', durationInDays: '' });
+      };
+
+      if (editingPlanId) {
+        await updatePlan(editingPlanId, planData);
+      } else {
+        await createPlan(planData);
+      }
+      
+      closeModal();
       loadPlans();
     } catch (error) {
-      alert('Failed to create plan');
+      alert(editingPlanId ? 'Failed to update plan' : 'Failed to create plan');
     }
+  };
+
+  const handleEditPlan = (plan) => {
+    setEditingPlanId(plan.id);
+    setFormData({
+      name: plan.name,
+      description: plan.description,
+      price: plan.price,
+      tokensIncluded: plan.tokensIncluded,
+      durationInDays: plan.durationInDays
+    });
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setEditingPlanId(null);
+    setFormData({ name: '', description: '', price: '', tokensIncluded: '', durationInDays: '' });
   };
 
   const handleDeactivate = async (id) => {
@@ -62,6 +87,17 @@ const PlanManagement = () => {
     }
   };
 
+  const handleReactivate = async (id) => {
+    if (window.confirm('Are you sure you want to reactivate this plan?')) {
+      try {
+        await reactivatePlan(id);
+        loadPlans();
+      } catch (error) {
+        alert('Failed to reactivate plan');
+      }
+    }
+  };
+
   return (
     <div className="flex h-screen bg-gray-100">
       <Sidebar />
@@ -69,7 +105,11 @@ const PlanManagement = () => {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-gray-800">Plan Management</h1>
           <button
-            onClick={() => setShowModal(true)}
+            onClick={() => {
+              setEditingPlanId(null);
+              setFormData({ name: '', description: '', price: '', tokensIncluded: '', durationInDays: '' });
+              setShowModal(true);
+            }}
             className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
           >
             Create New Plan
@@ -94,25 +134,48 @@ const PlanManagement = () => {
                   <p className="text-sm text-gray-500">Duration: {plan.durationInDays} days</p>
                   <p className="text-sm text-gray-500">Tokens Included: {plan.tokensIncluded}</p>
                 </div>
-                {plan.isActive && (
-                  <button
-                    onClick={() => handleDeactivate(plan.id)}
-                    className="mt-6 w-full bg-red-100 text-red-600 hover:bg-red-200 font-bold py-2 px-4 rounded"
-                  >
-                    Deactivate
-                  </button>
+                {plan.isActive ? (
+                  <div className="mt-6 flex space-x-2">
+                    <button
+                      onClick={() => handleEditPlan(plan)}
+                      className="flex-1 bg-blue-100 text-blue-600 hover:bg-blue-200 font-bold py-2 px-4 rounded"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeactivate(plan.id)}
+                      className="flex-1 bg-red-100 text-red-600 hover:bg-red-200 font-bold py-2 px-4 rounded"
+                    >
+                      Deactivate
+                    </button>
+                  </div>
+                ) : (
+                  <div className="mt-6 flex space-x-2">
+                    <button
+                      onClick={() => handleEditPlan(plan)}
+                      className="flex-1 bg-blue-100 text-blue-600 hover:bg-blue-200 font-bold py-2 px-4 rounded"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleReactivate(plan.id)}
+                      className="flex-1 bg-green-100 text-green-600 hover:bg-green-200 font-bold py-2 px-4 rounded"
+                    >
+                      Activate
+                    </button>
+                  </div>
                 )}
               </div>
             ))}
           </div>
         )}
 
-        {/* Create Plan Modal */}
+        {/* Create / Edit Plan Modal */}
         {showModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
-              <h2 className="text-2xl font-bold mb-6">Create New Plan</h2>
-              <form onSubmit={handleCreatePlan}>
+              <h2 className="text-2xl font-bold mb-6">{editingPlanId ? 'Edit Plan' : 'Create New Plan'}</h2>
+              <form onSubmit={handleSubmitPlan}>
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-700">Plan Name</label>
                   <input type="text" name="name" required value={formData.name} onChange={handleInputChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
@@ -136,8 +199,8 @@ const PlanManagement = () => {
                   <input type="number" name="tokensIncluded" required value={formData.tokensIncluded} onChange={handleInputChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
                 </div>
                 <div className="flex justify-end space-x-3">
-                  <button type="button" onClick={() => setShowModal(false)} className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded">Cancel</button>
-                  <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Create Plan</button>
+                  <button type="button" onClick={closeModal} className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded">Cancel</button>
+                  <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">{editingPlanId ? 'Update Plan' : 'Create Plan'}</button>
                 </div>
               </form>
             </div>
