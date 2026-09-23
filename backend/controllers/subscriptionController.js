@@ -11,9 +11,12 @@ const createCheckoutSession = async (req, res, next) => {
       });
     }
 
+    const origin = req.headers.origin || 'http://localhost:5173';
+
     const session = await subscriptionService.createCheckoutSession({
       user: req.user,
       subscriptionPlanId,
+      origin,
     });
 
     return res.status(200).json({

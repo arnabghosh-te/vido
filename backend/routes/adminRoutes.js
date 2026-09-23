@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const {getAdminPlans,getUsers,updateUserRole,updateUserStatus,getSystemStats,getCallsHistory,createPlan,updatePlan,deactivatePlan} = require('../controllers/adminController');
+const {getAdminPlans,getUsers,updateUserRole,updateUserStatus,getSystemStats,getCallsHistory,createPlan,updatePlan,deactivatePlan,reactivatePlan} = require('../controllers/adminController');
 const { authenticate, authorizeSuperAdmin } = require('../middleware/auth');
 
 router.use(authenticate);
@@ -19,5 +19,6 @@ router.get('/plans', getAdminPlans);
 router.post('/plans',createPlan);
 router.put('/plans/:id',updatePlan);
 router.patch('/plans/:id/deactivate',deactivatePlan);
+router.patch('/plans/:id/reactivate',reactivatePlan);
 
 module.exports = router;

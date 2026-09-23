@@ -2,7 +2,7 @@ const stripe = require("./stripeService");
 const { Plan, Subscription } = require("../models");
 
 
-const createCheckoutSession = async ({ user, subscriptionPlanId }) => {
+const createCheckoutSession = async ({ user, subscriptionPlanId, origin }) => {
   const plan = await Plan.findByPk(subscriptionPlanId);
 
   if (!plan) {
@@ -40,8 +40,8 @@ const createCheckoutSession = async ({ user, subscriptionPlanId }) => {
       subscriptionPlanId: String(plan.id),
     },
 
-    success_url: process.env.STRIPE_SUCCESS_URL,
-    cancel_url: process.env.STRIPE_CANCEL_URL,
+    success_url: `${origin}/profile?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${origin}/profile`,
   });
 
   return session;

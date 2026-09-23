@@ -48,3 +48,8 @@ export const cancelFriendRequest = async (receiverId) => {
   const response = await api.delete(`/request/${receiverId}/cancel`);
   return response.data;
 };
+
+export const removeFriend = async (friendId) => {
+  const response = await api.delete(`/${friendId}`);
+  return response.data;
+};

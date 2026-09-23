@@ -237,3 +237,31 @@ exports.cancelRequest = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+exports.removeFriend = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { friendId } = req.params;
+
+    const friend = await Friend.findOne({
+      where: {
+        [Op.or]: [
+          { userId1: userId, userId2: friendId },
+          { userId1: friendId, userId2: userId }
+        ]
+      }
+    });
+
+    if (!friend) {
+      return res.status(404).json({ success: false, message: "Friend not found." });
+    }
+
+    await friend.destroy();
+
+    sendToUser(friendId, 'FRIEND_REMOVED', { friendId: userId });
+
+    res.status(200).json({ success: true, message: "Friend removed successfully." });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

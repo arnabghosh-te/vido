@@ -185,6 +185,22 @@ const deactivatePlan = async (req, res) => {
     }
 };
 
+const reactivatePlan = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const plan = await Plan.findByPk(id);
+        if (!plan) {
+            return res.status(404).json({ success: false, message: 'Plan not found' });
+        }
+
+        plan.isActive = true;
+        await plan.save();
+        res.status(200).json({ success: true, message: 'Plan reactivated successfully' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 module.exports = {
     getUsers,
     updateUserStatus,
@@ -195,5 +211,6 @@ module.exports = {
     createPlan,
     updatePlan,
     deactivatePlan,
+    reactivatePlan,
     getAllPlans
 };

@@ -24,3 +24,8 @@ export const deactivatePlan = async (id) => {
     const response = await axios.patch(`/api/admin/plans/${id}/deactivate`);
     return response.data;
 };
+
+export const reactivatePlan = async (id) => {
+    const response = await axios.patch(`/api/admin/plans/${id}/reactivate`);
+    return response.data;
+};
