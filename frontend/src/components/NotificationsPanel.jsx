@@ -99,29 +99,30 @@ const NotificationsPanel = () => {
                   <div key={notif.id} className={`p-4 border-b border-gray-100 dark:border-gray-700 ${!notif.isRead ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-800'}`}>
                     <p className="text-sm text-gray-800 dark:text-gray-200 font-medium">{notif.title}</p>
                     <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{notif.message}</p>
-                    
-                    {notif.type === 'friend_request' && relatedRequest && !notif.isRead && (
+                    {/* Friend Request Actions */}
+                    {notif.type === 'friend_request' && relatedRequest && (
                       <div className="mt-2 flex space-x-2">
                         <button 
                           onClick={() => handleAccept(relatedRequest.id, notif.id)}
-                          className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 rounded"
+                          className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 rounded transition-colors"
                         >
                           Accept
                         </button>
                         <button 
                           onClick={() => handleReject(relatedRequest.id, notif.id)}
-                          className="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 text-xs px-3 py-1 rounded"
+                          className="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 text-xs px-3 py-1 rounded transition-colors"
                         >
                           Reject
                         </button>
                       </div>
                     )}
                     
-                    {!notif.isRead && notif.type !== 'friend_request' && (
-                       <div className="mt-2 text-right">
+                    {/* Mark as read button */}
+                    {!notif.isRead && (
+                       <div className="mt-2 flex justify-end">
                          <button 
                            onClick={() => handleMarkRead(notif.id)}
-                           className="text-xs text-blue-500 hover:underline"
+                           className="text-xs text-blue-500 hover:text-blue-600 dark:hover:text-blue-400 hover:underline"
                          >
                            Mark as read
                          </button>
