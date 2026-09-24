@@ -1,10 +1,9 @@
+require("dotenv").config();
 const http = require("http");
 const app = require("./app");
 const sequelize = require("./config/database");
 const { initSockets } = require("./sockets/index");
 const callMonitorService = require("./services/callMonitorService");
-
-require("dotenv").config();
 
 const PORT = process.env.PORT || 5000;
 
