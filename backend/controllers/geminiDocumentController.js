@@ -25,13 +25,13 @@ const formatGeminiResponse = (text) => {
     .replace(/```[a-zA-Z0-9_-]*\n?/g, "")
     .replace(/```/g, "")
 
-  
+
     .replace(/`/g, "")
 
- 
+
     .replace(/[ \t]+/g, " ")
 
-  
+
     .replace(/\n{3,}/g, "\n\n")
 
     .trim();
@@ -130,7 +130,7 @@ exports.queryDocument = async (req, res, next) => {
       });
     }
 
-   
+
     if (!document.geminiFileUri) {
       return res.status(400).json({
         success: false,
@@ -144,60 +144,96 @@ exports.queryDocument = async (req, res, next) => {
     // console.log("User question:", question);
 
 
-    const interaction = await ai.interactions.create({
-      model: "gemini-3.5-flash-lite",
+    let response;
+    try {
+      response = await ai.models.generateContent({
+        model: "gemini-3.5-flash-lite",
+        contents: [
+          question.trim(),
+          {
+            fileData: {
+              fileUri: document.geminiFileUri,
+              mimeType: document.mimeType,
+            },
+          },
+        ],
+      });
+    } catch (err) {
+      // If Gemini returns a 404, it might mean the file expired after 48 hours.
+      // Auto-recover by re-uploading the file from our local storage!
+      if (err.status === 404 || (err.message && err.message.includes("404"))) {
+        console.log("Document expired on Gemini. Re-uploading & retrying with 3.5-flash-lite...");
+        const fullPath = path.resolve(document.filePath);
+        
+        const uploadResult = await ai.files.upload({
+          file: fullPath,
+          config: {
+            mimeType: document.mimeType,
+          },
+        });
 
-      input: [
-        {
-          type: "text",
-          text: question.trim(),
-        },
-        {
-          type: "document",
-          uri: document.geminiFileUri,
-          mime_type: document.mimeType,
-        },
-      ],
-    });
+        // Update the database with the fresh URI
+        document.geminiFileName = uploadResult.name;
+        document.geminiFileUri = uploadResult.uri;
+        await document.save();
 
-    const rawAnswer = interaction.output_text || "";
+        // Retry the generation with the fresh URI
+        response = await ai.models.generateContent({
+          model: "gemini-3.5-flash-lite",
+          contents: [
+            question.trim(),
+            {
+              fileData: {
+                fileUri: document.geminiFileUri,
+                mimeType: document.mimeType,
+              },
+            },
+          ],
+        });
+      } else {
+        throw err; // Re-throw if it's not a 404
+      }
+    }
 
-    const answer = formatGeminiResponse(rawAnswer);
+    const rawAnswer = response.text || "";
 
-    // Save chat history
-    await DocumentChat.create({
+  const answer = formatGeminiResponse(rawAnswer);
+
+  // Save chat history
+  await DocumentChat.create({
+    documentId: document.id,
+    userId,
+    role: "user",
+    text: question.trim(),
+  });
+
+  await DocumentChat.create({
+    documentId: document.id,
+    userId,
+    role: "bot",
+    text: answer,
+  });
+
+  return res.status(200).json({
+    success: true,
+    message: "Question answered successfully",
+    data: {
       documentId: document.id,
-      userId,
-      role: "user",
-      text: question.trim(),
-    });
-    
-    await DocumentChat.create({
-      documentId: document.id,
-      userId,
-      role: "bot",
-      text: answer,
-    });
+      question: question.trim(),
+      answer,
+    },
+  });
 
-    return res.status(200).json({
-      success: true,
-      message: "Question answered successfully",
-      data: {
-        documentId: document.id,
-        question: question.trim(),
-        answer,
-      },
-    });
+} catch (error) {
+  console.error("Gemini query error:", error);
 
-  } catch (error) {
-    console.error("Gemini query error:", error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Failed to process document question",
-      data: null,
-    });
-  }
+  return res.status(500).json({
+    success: false,
+    message: "Failed to process document question",
+    error: error.message || String(error),
+    data: null,
+  });
+}
 };
 
 

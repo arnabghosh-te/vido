@@ -63,7 +63,6 @@ const DocumentChat = () => {
         documentId: selectedDocument.id,
         question: userMsg.text,
       });
-
       setMessages((prev) => [
         ...prev,
         {
