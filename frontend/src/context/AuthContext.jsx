@@ -109,8 +109,26 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const forgotPassword = async (email) => {
+    try {
+      const response = await axios.post('/api/auth/forgot-password', { email });
+      return { success: true, message: response.data.message };
+    } catch (err) {
+      return { success: false, message: err.response?.data?.message || 'Failed to send reset code' };
+    }
+  };
+
+  const resetPassword = async (email, otp, newPassword) => {
+    try {
+      const response = await axios.post('/api/auth/reset-password', { email, otp, newPassword });
+      return { success: true, message: response.data.message };
+    } catch (err) {
+      return { success: false, message: err.response?.data?.message || 'Failed to reset password' };
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, error, login, register, verifyOtp, logout, updateProfile, changePassword }}>
+    <AuthContext.Provider value={{ user, loading, error, login, register, verifyOtp, logout, updateProfile, changePassword, forgotPassword, resetPassword }}>
       {!loading && children}
     </AuthContext.Provider>
   );

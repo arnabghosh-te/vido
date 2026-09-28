@@ -6,6 +6,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import GlobalBackButton from './components/GlobalBackButton';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
 import Home from './pages/Home';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import UserManagement from './pages/admin/UserManagement';
@@ -27,6 +28,7 @@ function App() {
           <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<Home />} />
