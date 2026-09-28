@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { User, Role } = require('../models');
+const crypto = require('crypto');
+const { User, Role, Otp, sequelize } = require('../models');
 
 class AuthService {
     async register(name, email, password, roleName = 'USER') {
@@ -27,7 +28,6 @@ class AuthService {
         const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
         
         // Store OTP
-        const { Otp } = require('../models');
         await Otp.create({
             userId: user.id,
             otp: otpCode,
@@ -109,6 +109,70 @@ class AuthService {
         const hashedPassword = await bcrypt.hash(newPassword, 10);
         user.password = hashedPassword;
         await user.save();
+
+        return true;
+    }
+
+    async forgotPassword(email) {
+        const user = await User.findOne({ where: { email } });
+        if (!user || !user.isActive) {
+            return { success: true, message: 'If an account exists for that email, a password reset token has been sent.' };
+        }
+
+        await Otp.destroy({ where: { userId: user.id } });
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        const resetTokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
+        const otpRecord = await Otp.create({
+            userId: user.id,
+            otp: resetTokenHash,
+            expiresAt: new Date(Date.now() + 15 * 60 * 1000)
+        });
+
+        try {
+            const emailService = require('./emailService');
+            await emailService.sendPasswordResetEmail(email, resetToken);
+        } catch (error) {
+            await otpRecord.destroy();
+            throw new Error('Unable to send password reset email', { cause: error });
+        }
+
+        return { success: true, message: 'If an account exists for that email, a password reset token has been sent.' };
+    }
+
+    async resetPassword(email, resetToken, newPassword) {
+        const user = await User.findOne({ where: { email } });
+        if (!user) {
+            throw new Error('Invalid or expired password reset token');
+        }
+
+        const resetTokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        const transaction = await sequelize.transaction();
+        try {
+            const lockedUser = await User.findByPk(user.id, {
+                transaction,
+                lock: transaction.LOCK.UPDATE
+            });
+            const otpRecord = await Otp.findOne({
+                where: { userId: user.id, otp: resetTokenHash },
+                transaction,
+                lock: transaction.LOCK.UPDATE
+            });
+
+            if (!lockedUser || !otpRecord || new Date() > otpRecord.expiresAt) {
+                await transaction.rollback();
+                throw new Error('Invalid or expired password reset token');
+            }
+
+            await lockedUser.update({ password: hashedPassword }, { transaction });
+            await Otp.destroy({ where: { userId: user.id }, transaction });
+            await transaction.commit();
+        } catch (error) {
+            if (!transaction.finished) {
+                await transaction.rollback();
+            }
+            throw error;
+        }
 
         return true;
     }

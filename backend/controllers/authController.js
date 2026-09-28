@@ -99,11 +99,57 @@ const changePassword = async (req, res) => {
     }
 };
 
+const forgotPassword = async (req, res) => {
+    const { email } = req.body;
+    if (typeof email !== 'string' || !email.trim()) {
+        return res.status(400).json({ success: false, message: 'Email is required' });
+    }
+
+    try {
+        const result = await authService.forgotPassword(email);
+        res.status(200).json(result);
+    } catch (error) {
+        console.error('Forgot password failed:', error);
+        res.status(500).json({ success: false, message: 'Unable to process password reset request' });
+    }
+};
+
+const resetPassword = async (req, res) => {
+    const { email, token, newPassword } = req.body;
+    if (
+        typeof email !== 'string' ||
+        !email.trim() ||
+        typeof token !== 'string' ||
+        !token ||
+        typeof newPassword !== 'string' ||
+        !newPassword
+    ) {
+        return res.status(400).json({
+            success: false,
+            message: 'Email, reset token, and new password are required'
+        });
+    }
+
+    try {
+        await authService.resetPassword(email, token, newPassword);
+        res.status(200).json({ success: true, message: 'Password reset successfully' });
+    } catch (error) {
+        if (error.message === 'Invalid or expired password reset token') {
+            return res.status(400).json({ success: false, message: error.message });
+        }
+
+        console.error('Reset password failed:', error);
+        res.status(500).json({ success: false, message: 'Unable to reset password' });
+    }
+};
+
 module.exports = {
     register,
     verifyOtp,
     login,
     getProfile,
     updateProfile,
-    changePassword
+    changePassword,
+    forgotPassword,
+    resetPassword
 };

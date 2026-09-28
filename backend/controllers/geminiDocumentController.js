@@ -299,7 +299,7 @@ exports.getDocumentChats = async (req, res, next) => {
       message: "Chats fetched successfully",
       data: chats,
     });
-  } catch (error) {
+  } catch (error) { 
     console.error("Get document chats error:", error);
 
     return res.status(500).json({

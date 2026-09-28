@@ -47,6 +47,38 @@ class EmailService {
 
         return info;
     }
+
+    async sendPasswordResetEmail(toEmail, resetToken) {
+        let transporterToUse = this.transporter;
+
+        if (!process.env.SMTP_USER) {
+            console.log("No SMTP_USER configured. Using Ethereal Email for testing.");
+            const testAccount = await nodemailer.createTestAccount();
+            transporterToUse = nodemailer.createTransport({
+                host: "smtp.ethereal.email",
+                port: 587,
+                secure: false,
+                auth: {
+                    user: testAccount.user,
+                    pass: testAccount.pass,
+                },
+            });
+        }
+
+        const info = await transporterToUse.sendMail({
+            from: '"Vidu App" <noreply@viduapp.com>',
+            to: toEmail,
+            subject: 'Your Vidu password reset token',
+            text: `Use this token to reset your Vidu password: ${resetToken}. It expires in 15 minutes.`,
+            html: `<p>Use this token to reset your Vidu password:</p><p><b>${resetToken}</b></p><p>It expires in 15 minutes.</p>`
+        });
+
+        if (!process.env.SMTP_USER) {
+            console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+        }
+
+        return info;
+    }
 }
 
 module.exports = new EmailService();
