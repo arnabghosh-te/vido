@@ -28,7 +28,7 @@ class AuthService {
         const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
         
         // Store OTP
-        await Otp.create({
+         Otp.create({
             userId: user.id,
             otp: otpCode,
             expiresAt: new Date(Date.now() + 15 * 60 * 1000) // 15 minutes
@@ -36,7 +36,7 @@ class AuthService {
 
         // Send Email
         const emailService = require('./emailService');
-        await emailService.sendOtpEmail(email, otpCode);
+         emailService.sendOtpEmail(email, otpCode);
 
         return { 
             success: true, 
@@ -120,17 +120,16 @@ class AuthService {
         }
 
         await Otp.destroy({ where: { userId: user.id } });
-        const resetToken = crypto.randomBytes(32).toString('hex');
-        const resetTokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
+        const resetOtp = Math.floor(100000 + Math.random() * 900000).toString();
         const otpRecord = await Otp.create({
             userId: user.id,
-            otp: resetTokenHash,
+            otp: resetOtp,
             expiresAt: new Date(Date.now() + 15 * 60 * 1000)
         });
 
         try {
             const emailService = require('./emailService');
-            await emailService.sendPasswordResetEmail(email, resetToken);
+             emailService.sendPasswordResetEmail(email, resetOtp);
         } catch (error) {
             await otpRecord.destroy();
             throw new Error('Unable to send password reset email', { cause: error });
@@ -139,13 +138,12 @@ class AuthService {
         return { success: true, message: 'If an account exists for that email, a password reset token has been sent.' };
     }
 
-    async resetPassword(email, resetToken, newPassword) {
+    async resetPassword(email, resetOtp, newPassword) {
         const user = await User.findOne({ where: { email } });
         if (!user) {
-            throw new Error('Invalid or expired password reset token');
+            throw new Error('Invalid or expired password reset OTP');
         }
 
-        const resetTokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
         const hashedPassword = await bcrypt.hash(newPassword, 10);
         const transaction = await sequelize.transaction();
         try {
@@ -154,14 +152,14 @@ class AuthService {
                 lock: transaction.LOCK.UPDATE
             });
             const otpRecord = await Otp.findOne({
-                where: { userId: user.id, otp: resetTokenHash },
+                where: { userId: user.id, otp: resetOtp },
                 transaction,
                 lock: transaction.LOCK.UPDATE
             });
 
             if (!lockedUser || !otpRecord || new Date() > otpRecord.expiresAt) {
                 await transaction.rollback();
-                throw new Error('Invalid or expired password reset token');
+                throw new Error('Invalid or expired password reset OTP');
             }
 
             await lockedUser.update({ password: hashedPassword }, { transaction });

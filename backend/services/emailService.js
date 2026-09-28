@@ -68,9 +68,9 @@ class EmailService {
         const info = await transporterToUse.sendMail({
             from: '"Vidu App" <noreply@viduapp.com>',
             to: toEmail,
-            subject: 'Your Vidu password reset token',
-            text: `Use this token to reset your Vidu password: ${resetToken}. It expires in 15 minutes.`,
-            html: `<p>Use this token to reset your Vidu password:</p><p><b>${resetToken}</b></p><p>It expires in 15 minutes.</p>`
+            subject: 'Your Vidu password reset OTP',
+            text: `Use this OTP to reset your Vidu password: ${resetToken}. It expires in 15 minutes.`,
+            html: `<p>Use this OTP to reset your Vidu password:</p><p><b>${resetToken}</b></p><p>It expires in 15 minutes.</p>`
         });
 
         if (!process.env.SMTP_USER) {

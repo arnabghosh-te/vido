@@ -115,26 +115,26 @@ const forgotPassword = async (req, res) => {
 };
 
 const resetPassword = async (req, res) => {
-    const { email, token, newPassword } = req.body;
+    const { email, otp, newPassword } = req.body;
     if (
         typeof email !== 'string' ||
         !email.trim() ||
-        typeof token !== 'string' ||
-        !token ||
+        typeof otp !== 'string' ||
+        !otp ||
         typeof newPassword !== 'string' ||
         !newPassword
     ) {
         return res.status(400).json({
             success: false,
-            message: 'Email, reset token, and new password are required'
+            message: 'Email, reset OTP, and new password are required'
         });
     }
 
     try {
-        await authService.resetPassword(email, token, newPassword);
+        await authService.resetPassword(email, otp, newPassword);
         res.status(200).json({ success: true, message: 'Password reset successfully' });
     } catch (error) {
-        if (error.message === 'Invalid or expired password reset token') {
+        if (error.message === 'Invalid or expired password reset OTP') {
             return res.status(400).json({ success: false, message: error.message });
         }
 
