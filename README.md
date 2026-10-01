@@ -1,7 +1,7 @@
 # Vidu — Video Communication & AI Document Platform
 
 
-# Run this commands on terminal for successfull compilation of the project
+# Run this commands on terminal for successfull compilation of the project [!! make sure that this tools are installd in your local machine i.e. stripe,xloudeflare Tunnel, livekit ]
 
 stripe listen --forward-to localhost:5000/api/stripe/webhook
 cloudflared tunnel --url http://localhost:5173
